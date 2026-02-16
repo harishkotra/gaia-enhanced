@@ -7,3 +7,4 @@ All changes that diverge from upstream (GaiaNet-AI/gaianet-node) are tracked her
 - Added README-MCP.md to document MCP fork goals and status.
 - Updated installer/uninstaller branding to GaiaNet-MCP.
 - Centralized gaianet-node download URLs to point at this fork via env-configurable repo settings in install.sh.
+- Added registry registration on node start via the gaianet wrapper.

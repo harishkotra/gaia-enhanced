@@ -25,6 +25,18 @@ Example:
 GAIA_ENHANCED_REPO_OWNER=your-org GAIA_ENHANCED_REPO_NAME=gaia-enhanced ./install.sh
 ```
 
+## Registry Integration
+
+By default, the gaianet wrapper attempts to register MCP metadata to a registry service at `http://127.0.0.1:9100`. Override the target with:
+
+- REGISTRY_URL
+
+Example:
+
+```bash
+REGISTRY_URL=https://registry.example.com ./gaianet start
+```
+
 ## Upstream
 
 This fork started from GaiaNet-AI/gaianet-node. Upstream development appears inactive; we will periodically cherry-pick fixes if needed.

@@ -52,6 +52,7 @@ Registry:
 
 - Node startup scripts start the MCP server after the main node services are live.
 - The MCP server reads config.json plus an optional mcp_config.json.
+- The gaianet wrapper posts MCP metadata to the registry on start (default REGISTRY_URL is http://127.0.0.1:9100).
 - All MCP endpoints are read-only; no control plane actions in v1.
 
 ## Non-goals (v1)

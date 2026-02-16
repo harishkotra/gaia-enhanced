@@ -433,6 +433,9 @@ base_dir="${GAIANET_BASE_DIR:-$HOME/gaianet}"
 mcp_bin="$bin_dir/gaianet-mcp-server"
 pid_file="$base_dir/mcp-server.pid"
 log_file="$base_dir/log/mcp-server.log"
+registry_url="${REGISTRY_URL:-http://127.0.0.1:9100}"
+registry_log="$base_dir/log/registry-client.log"
+mcp_port="${MCP_PORT:-9090}"
 
 start_mcp() {
     if [ -x "$mcp_bin" ]; then
@@ -440,9 +443,65 @@ start_mcp() {
             return 0
         fi
         mkdir -p "$base_dir/log"
-        MCP_CONFIG="$base_dir/mcp_config.json" MCP_PORT="${MCP_PORT:-9090}" "$mcp_bin" >>"$log_file" 2>&1 &
+        MCP_CONFIG="$base_dir/mcp_config.json" MCP_PORT="$mcp_port" "$mcp_bin" >>"$log_file" 2>&1 &
         echo $! > "$pid_file"
     fi
+}
+
+register_node() {
+    if [ -z "$registry_url" ]; then
+        return 0
+    fi
+    if ! command -v curl >/dev/null 2>&1; then
+        return 0
+    fi
+    if ! command -v python3 >/dev/null 2>&1; then
+        return 0
+    fi
+    if [ ! -f "$base_dir/nodeid.json" ] || [ ! -f "$base_dir/config.json" ] || [ ! -f "$base_dir/mcp_config.json" ]; then
+        return 0
+    fi
+
+    payload=$(python3 - "$base_dir" "$mcp_port" <<'PY'
+import json
+import os
+import sys
+
+base_dir = sys.argv[1]
+mcp_port = sys.argv[2]
+
+def read_json(path):
+    with open(path, "r") as handle:
+        return json.load(handle)
+
+nodeid = read_json(os.path.join(base_dir, "nodeid.json"))
+config = read_json(os.path.join(base_dir, "config.json"))
+mcp = read_json(os.path.join(base_dir, "mcp_config.json"))
+
+address = str(nodeid.get("address", "")).strip()
+domain = str(config.get("domain", "")).strip()
+subdomain = str(config.get("address", "")).strip()
+
+public_url = ""
+if subdomain and domain:
+    public_url = f"https://{subdomain}.{domain}"
+
+mcp["http_url"] = mcp.get("http_url") or f"http://127.0.0.1:{mcp_port}"
+
+payload = {
+    "node_id": address or subdomain or "unknown-node",
+    "public_url": public_url or None,
+    "mcp": mcp,
+}
+
+print(json.dumps(payload))
+PY
+    ) || return 0
+
+    mkdir -p "$base_dir/log"
+    curl -sSf -X POST "$registry_url/nodes/register" \
+        -H "Content-Type: application/json" \
+        -d "$payload" >>"$registry_log" 2>&1 || true
 }
 
 stop_mcp() {
@@ -455,6 +514,7 @@ stop_mcp() {
 case "$1" in
     start)
         start_mcp
+        register_node &
         exec "$real_gaianet" "$@"
         ;;
     stop)
