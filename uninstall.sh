@@ -46,7 +46,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --version)
-            echo "Gaianet-node Uninstaller $version"
+            echo "GaiaNet-MCP Uninstaller $version"
             exit 0
             ;;
         --help)

@@ -1,0 +1,14 @@
+{
+  "enabled": true,
+  "http_url": "http://127.0.0.1:9090",
+  "stdio": false,
+  "capabilities": ["chat", "embeddings", "knowledge_search", "node_info"],
+  "tools": [
+    {
+      "name": "chat.complete",
+      "description": "Chat completion",
+      "input_schema": {"type": "object"}
+    }
+  ],
+  "resources": []
+}

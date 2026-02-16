@@ -18,6 +18,14 @@ vector_version="0.38.0"
 dashboard_version="v3.1"
 qdrant_version="v1.14.1"
 cardea_agentic_search_mcp_server_version="0.10.0"
+mcp_server_version="0.1.0"
+
+# Fork identity (override with env vars when needed)
+fork_owner="${GAIA_ENHANCED_REPO_OWNER:-shk}"
+fork_repo="${GAIA_ENHANCED_REPO_NAME:-gaia-enhanced}"
+fork_repo_base="https://github.com/${fork_owner}/${fork_repo}"
+fork_release_base="${fork_repo_base}/releases/download"
+fork_raw_base="${fork_repo_base}/raw"
 
 # 0: do not reinstall, 1: reinstall
 reinstall=0
@@ -134,7 +142,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --version)
-            echo "Gaianet-node Installer v$version"
+            echo "GaiaNet-MCP Installer v$version"
             exit 0
             ;;
         --help)
@@ -365,16 +373,103 @@ bin_dir=$gaianet_base_dir/bin
 
 # 1. Install `gaianet` CLI tool.
 printf "[+] Installing gaianet CLI tool ...\n"
-check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/gaianet $bin_dir/gaianet
+check_curl $fork_release_base/$version/gaianet $bin_dir/gaianet
 
 if [ "$repo_branch" = "main" ]; then
-    check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/gaianet $bin_dir/gaianet
+    check_curl $fork_release_base/$version/gaianet $bin_dir/gaianet
 else
-    check_curl https://github.com/GaiaNet-AI/gaianet-node/raw/$repo_branch/gaianet $bin_dir/gaianet
+    check_curl $fork_raw_base/$repo_branch/gaianet $bin_dir/gaianet
 fi
 
 chmod u+x $bin_dir/gaianet
 info "    👍 Done! Gaianet CLI tool is installed in $bin_dir"
+
+# 1.5 Install gaianet MCP server
+printf "[+] Installing gaianet MCP server ...\n"
+if [ "$(uname)" == "Darwin" ]; then
+    if [ "$target" = "x86_64" ]; then
+        check_curl $fork_release_base/$mcp_server_version/gaianet-mcp-server-apple-darwin-x86_64.tar.gz $bin_dir/gaianet-mcp-server.tar.gz
+    elif [ "$target" = "arm64" ]; then
+        check_curl $fork_release_base/$mcp_server_version/gaianet-mcp-server-apple-darwin-aarch64.tar.gz $bin_dir/gaianet-mcp-server.tar.gz
+    else
+        error " * Unsupported architecture: $target, only support x86_64 and arm64 on MacOS"
+        exit 1
+    fi
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    if [ "$target" = "x86_64" ]; then
+        check_curl $fork_release_base/$mcp_server_version/gaianet-mcp-server-unknown-linux-gnu-x86_64.tar.gz $bin_dir/gaianet-mcp-server.tar.gz
+    else
+        error " * Unsupported architecture: $target, only support x86_64 on Linux"
+        exit 1
+    fi
+else
+    error "Only support Linux, MacOS and Windows(WSL)."
+    exit 1
+fi
+tar -xzvf $bin_dir/gaianet-mcp-server.tar.gz -C $bin_dir gaianet-mcp-server
+rm $bin_dir/gaianet-mcp-server.tar.gz
+chmod u+x $bin_dir/gaianet-mcp-server
+info "    👍 Done! The gaianet MCP server is downloaded in $bin_dir"
+
+# 1.6 Write default MCP config
+if [ ! -f "$gaianet_base_dir/mcp_config.json" ]; then
+    printf "[+] Writing default mcp_config.json ...\n"
+    check_curl $fork_raw_base/$repo_branch/mcp-server/mcp_config.sample.json $gaianet_base_dir/mcp_config.json
+    info "    👍 Done! The mcp_config.json is created in $gaianet_base_dir"
+fi
+
+# 1.7 Wrap gaianet CLI to start MCP automatically
+if [ -f "$bin_dir/gaianet" ]; then
+    mv -f $bin_dir/gaianet $bin_dir/gaianet.real
+
+    cat > $bin_dir/gaianet <<'EOF'
+#!/bin/bash
+
+set -e
+
+bin_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+real_gaianet="$bin_dir/gaianet.real"
+base_dir="${GAIANET_BASE_DIR:-$HOME/gaianet}"
+mcp_bin="$bin_dir/gaianet-mcp-server"
+pid_file="$base_dir/mcp-server.pid"
+log_file="$base_dir/log/mcp-server.log"
+
+start_mcp() {
+    if [ -x "$mcp_bin" ]; then
+        if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+            return 0
+        fi
+        mkdir -p "$base_dir/log"
+        MCP_CONFIG="$base_dir/mcp_config.json" MCP_PORT="${MCP_PORT:-9090}" "$mcp_bin" >>"$log_file" 2>&1 &
+        echo $! > "$pid_file"
+    fi
+}
+
+stop_mcp() {
+    if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+        kill "$(cat "$pid_file")" || true
+        rm -f "$pid_file"
+    fi
+}
+
+case "$1" in
+    start)
+        start_mcp
+        exec "$real_gaianet" "$@"
+        ;;
+    stop)
+        stop_mcp
+        exec "$real_gaianet" "$@"
+        ;;
+    *)
+        exec "$real_gaianet" "$@"
+        ;;
+esac
+EOF
+
+    chmod u+x $bin_dir/gaianet
+    info "    👍 Done! gaianet now starts MCP by default"
+fi
 
 # 2. Download default `config.json`
 if [ "$upgrade" -eq 1 ]; then
@@ -438,9 +533,9 @@ else
 
     if [ ! -f "$gaianet_base_dir/config.json" ]; then
         if [ "$repo_branch" = "main" ]; then
-            check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/config.json $gaianet_base_dir/config.json
+            check_curl $fork_release_base/$version/config.json $gaianet_base_dir/config.json
         else
-            check_curl https://github.com/GaiaNet-AI/gaianet-node/raw/$repo_branch/config.json $gaianet_base_dir/config.json
+            check_curl $fork_raw_base/$repo_branch/config.json $gaianet_base_dir/config.json
         fi
 
         info "    👍 Done! The default config file is downloaded in $gaianet_base_dir"
@@ -465,7 +560,7 @@ if [ "$enable_vector" -eq 1 ]; then
     if [ ! -f "$gaianet_base_dir/vector.toml" ]; then
         printf "[+] Downloading vector config file ...\n"
 
-        check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/vector.toml $gaianet_base_dir/vector.toml
+        check_curl $fork_release_base/$version/vector.toml $gaianet_base_dir/vector.toml
 
         info "    * The vector.toml is downloaded in $gaianet_base_dir"
     fi
@@ -590,7 +685,7 @@ fi
 printf "[+] Downloading LlamaEdge API server ...\n"
 # download llama-api-server.wasm
 # check_curl https://github.com/LlamaEdge/LlamaEdge/releases/download/$llama_api_server_version/llama-api-server.wasm $gaianet_base_dir/llama-api-server.wasm
-check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/llama-api-server.wasm $gaianet_base_dir/llama-api-server.wasm
+check_curl $fork_release_base/$version/llama-api-server.wasm $gaianet_base_dir/llama-api-server.wasm
 
 info "    👍 Done! The llama-api-server.wasm is downloaded in $gaianet_base_dir"
 
@@ -696,7 +791,7 @@ fi
 # 11. Download registry.wasm
 if [ ! -f "$gaianet_base_dir/registry.wasm" ] || [ "$reinstall" -eq 1 ]; then
     printf "[+] Downloading registry.wasm ...\n"
-    check_curl https://github.com/GaiaNet-AI/gaianet-node/raw/main/utils/registry/registry.wasm $gaianet_base_dir/registry.wasm
+    check_curl $fork_raw_base/main/utils/registry/registry.wasm $gaianet_base_dir/registry.wasm
     info "    👍 Done! The registry.wasm is downloaded in $gaianet_base_dir"
 else
     warning "    ❗ Use the cached registry.wasm in $gaianet_base_dir"
@@ -743,7 +838,7 @@ else
     # download the default nodeid.json
     if [ ! -f "$gaianet_base_dir/nodeid.json" ]; then
         printf "    * Download nodeid.json ...⏳\n"
-        check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/nodeid.json $gaianet_base_dir/nodeid.json
+        check_curl $fork_release_base/$version/nodeid.json $gaianet_base_dir/nodeid.json
         info "      👍 Done!"
     fi
 
@@ -835,7 +930,7 @@ elif [ -f "$migrated_from_file" ] && ( tar -tf "$migrated_from_file" | grep -q "
     fi
 else
     printf "    * Download frpc.toml\n"
-    check_curl_silent https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/frpc.toml $gaianet_base_dir/gaia-frp/frpc.toml
+    check_curl_silent $fork_release_base/$version/frpc.toml $gaianet_base_dir/gaia-frp/frpc.toml
     info "      👍 Done! frpc.toml is downloaded in $gaianet_base_dir/gaia-frp"
 fi
 
