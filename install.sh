@@ -21,7 +21,7 @@ cardea_agentic_search_mcp_server_version="0.10.0"
 mcp_server_version="0.1.0"
 
 # Fork identity (override with env vars when needed)
-fork_owner="${GAIA_ENHANCED_REPO_OWNER:-shk}"
+fork_owner="${GAIA_ENHANCED_REPO_OWNER:-harishkotra}"
 fork_repo="${GAIA_ENHANCED_REPO_NAME:-gaia-enhanced}"
 fork_repo_base="https://github.com/${fork_owner}/${fork_repo}"
 fork_release_base="${fork_repo_base}/releases/download"

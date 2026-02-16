@@ -166,8 +166,10 @@ async fn main() {
 
     info!("GaiaNet registry service listening on {addr}");
 
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .expect("Failed to bind registry service");
+    axum::serve(listener, app.into_make_service())
         .await
         .expect("Registry service failed");
 }
