@@ -188,6 +188,41 @@ check_curl_silent() {
     fi
 }
 
+is_valid_wasm() {
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$1" <<'PY'
+import sys
+
+path = sys.argv[1]
+try:
+    with open(path, "rb") as handle:
+        magic = handle.read(4)
+    sys.exit(0 if magic == b"\x00asm" else 1)
+except Exception:
+    sys.exit(1)
+PY
+        return $?
+    fi
+
+    return 1
+}
+
+is_valid_frpc() {
+    if [ ! -f "$1" ]; then
+        return 1
+    fi
+
+    if grep -q "Not Found" "$1"; then
+        return 1
+    fi
+
+    if grep -q "serverAddr" "$1"; then
+        return 0
+    fi
+
+    return 1
+}
+
 sed_in_place() {
     if [ "$(uname)" == "Darwin" ]; then
         sed -i '' "$@"
@@ -744,8 +779,16 @@ fi
 # 7. Download LlamaEdge API server
 printf "[+] Downloading LlamaEdge API server ...\n"
 # download llama-api-server.wasm
-# check_curl https://github.com/LlamaEdge/LlamaEdge/releases/download/$llama_api_server_version/llama-api-server.wasm $gaianet_base_dir/llama-api-server.wasm
 check_curl $fork_release_base/$version/llama-api-server.wasm $gaianet_base_dir/llama-api-server.wasm
+if ! is_valid_wasm "$gaianet_base_dir/llama-api-server.wasm"; then
+    warning "    ❗ Invalid llama-api-server.wasm from fork release; falling back to LlamaEdge release"
+    rm -f $gaianet_base_dir/llama-api-server.wasm
+    check_curl https://github.com/LlamaEdge/LlamaEdge/releases/download/$llama_api_server_version/llama-api-server.wasm $gaianet_base_dir/llama-api-server.wasm
+    if ! is_valid_wasm "$gaianet_base_dir/llama-api-server.wasm"; then
+        error "    * Failed to download a valid llama-api-server.wasm"
+        exit 1
+    fi
+fi
 
 info "    👍 Done! The llama-api-server.wasm is downloaded in $gaianet_base_dir"
 
@@ -991,6 +1034,15 @@ elif [ -f "$migrated_from_file" ] && ( tar -tf "$migrated_from_file" | grep -q "
 else
     printf "    * Download frpc.toml\n"
     check_curl_silent $fork_release_base/$version/frpc.toml $gaianet_base_dir/gaia-frp/frpc.toml
+    if ! is_valid_frpc "$gaianet_base_dir/gaia-frp/frpc.toml"; then
+        warning "    ❗ Invalid frpc.toml from fork release; falling back to GaiaNet-AI release"
+        rm -f $gaianet_base_dir/gaia-frp/frpc.toml
+        check_curl_silent https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/frpc.toml $gaianet_base_dir/gaia-frp/frpc.toml
+        if ! is_valid_frpc "$gaianet_base_dir/gaia-frp/frpc.toml"; then
+            error "❌ Failed to download a valid frpc.toml"
+            exit 1
+        fi
+    fi
     info "      👍 Done! frpc.toml is downloaded in $gaianet_base_dir/gaia-frp"
 fi
 

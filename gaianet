@@ -39,6 +39,10 @@ warning() {
     printf "${YELLOW}$1${NC}\n\n"
 }
 
+store_force() {
+    :
+}
+
 # download target file to destination. If failed, then exit
 check_curl() {
     curl --retry 3 --progress-bar -L "$1" -o "$2"
