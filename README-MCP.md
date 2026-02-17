@@ -45,6 +45,16 @@ This fork started from GaiaNet-AI/gaianet-node. Upstream development appears ina
 
 Once your GaiaNet node is running, the MCP server is automatically started and **accessible through your public node URL**. An integrated gateway routes MCP traffic seamlessly through the same domain as your main node APIs.
 
+### Finding Your Node URL
+
+When you run `gaianet start`, the output displays your node's public URL:
+
+```
+... https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains
+```
+
+The node ID is the `0x...` address at the beginning. Use this in all MCP requests.
+
 ### MCP Endpoints
 
 | Endpoint | Description | Method |
@@ -55,18 +65,20 @@ Once your GaiaNet node is running, the MCP server is automatically started and *
 
 ### Quick Test
 
+Replace `0xf63939431ee11267f4855a166e11cc44d24960c0` with your actual node ID from the startup output:
+
 ```bash
 # Test from anywhere using your public node URL
-curl https://0xYOUR-NODE-ID.gaia.domains/health
-curl https://0xYOUR-NODE-ID.gaia.domains/v1/mcp/discover | jq .
+curl https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains/health
+curl https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains/v1/mcp/discover | jq .
 
 # Or test locally on the node machine
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/v1/mcp/discover | jq .
 
-# Use test scripts
-NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
-python3 examples/test-mcp.py
+# Use test scripts (replace with your actual node ID)
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains ./examples/test-mcp.sh
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains python3 examples/test-mcp.py
 ```
 
 ### Python Example
@@ -74,9 +86,9 @@ python3 examples/test-mcp.py
 ```python
 import requests
 
-# Use your public node URL
-mcp_base = "https://0xYOUR-NODE-ID.gaia.domains"
-chat_base = "https://0xYOUR-NODE-ID.gaia.domains"
+# Use your public node URL (replace with your actual node ID from gaianet start output)
+mcp_base = "https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains"
+chat_base = "https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains"
 
 # Discover node capabilities
 response = requests.get(f'{mcp_base}/v1/mcp/discover')
@@ -103,9 +115,9 @@ print(f"\nChat Response: {chat_response.json()['choices'][0]['message']['content
 ```javascript
 const fetch = require('node-fetch');
 
-// Use your public node URL
-const mcpBase = 'https://0xYOUR-NODE-ID.gaia.domains';
-const chatBase = 'https://0xYOUR-NODE-ID.gaia.domains';
+// Use your public node URL (replace with your actual node ID from gaianet start output)
+const mcpBase = 'https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains';
+const chatBase = 'https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains';
 
 async function discoverMCP() {
   // Discover capabilities

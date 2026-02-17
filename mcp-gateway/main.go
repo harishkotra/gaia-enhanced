@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -15,8 +16,8 @@ func main() {
 		log.Fatal("Failed to parse MCP URL:", err)
 	}
 
-	// Gaia nexus on port 8081 (we'll move it from 8080 to 8081)
-	nexusURL, err := url.Parse("http://127.0.0.1:8081")
+	// Gaia nexus on port 3389 (where it actually listens)
+	nexusURL, err := url.Parse("http://127.0.0.1:3389")
 	if err != nil {
 		log.Fatal("Failed to parse nexus URL:", err)
 	}
@@ -47,6 +48,23 @@ func main() {
 			return
 		}
 
+		// Serve dashboard at root
+		if r.URL.Path == "/" {
+			dashboardPath := os.Getenv("HOME") + "/gaianet/dashboard/index.html"
+			http.ServeFile(w, r, dashboardPath)
+			return
+		}
+
+		// Serve static files from dashboard directory
+		if strings.HasPrefix(r.URL.Path, "/_next/") ||
+			strings.HasPrefix(r.URL.Path, "/fonts/") ||
+			strings.HasPrefix(r.URL.Path, "/chatbot-ui/") ||
+			(!strings.HasPrefix(r.URL.Path, "/v1/") && !strings.HasPrefix(r.URL.Path, "/admin/")) {
+			dashboardPath := os.Getenv("HOME") + "/gaianet/dashboard" + r.URL.Path
+			http.ServeFile(w, r, dashboardPath)
+			return
+		}
+
 		// Route everything else to gaia-nexus
 		log.Printf("Routing to Nexus: %s %s", r.Method, r.URL.Path)
 		nexusProxy.ServeHTTP(w, r)
@@ -54,8 +72,9 @@ func main() {
 
 	log.Println("MCP Gateway starting on :8080")
 	log.Println("  - MCP endpoints → localhost:9090")
-	log.Println("  - Other traffic → localhost:8081 (gaia-nexus)")
-	
+	log.Println("  - Static files → ~/gaianet/dashboard")
+	log.Println("  - Other API traffic → localhost:3389 (gaia-nexus)")
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("Gateway failed:", err)
 	}

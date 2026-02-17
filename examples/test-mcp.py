@@ -164,7 +164,7 @@ def main():
     print("=" * 60)
     print("\n💡 Next steps:")
     print("   - View dashboard: https://<your-node-id>.gaia.domains/")
-    print("   - Read docs: README-MCP.md")
+    print("   - Read docs: README.md (MCP section)")
     print("   - Explore APIs: curl http://127.0.0.1:9090/mcp/info")
 
 if __name__ == '__main__':

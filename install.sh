@@ -1057,15 +1057,21 @@ if [ ! -d "$gaianet_base_dir/dashboard" ] || [ "$reinstall" -eq 1 ]; then
     printf "    * Adding MCP information to dashboard ...\n"
     if [ -f "$gaianet_base_dir/dashboard/index.html" ]; then
         # Check if already patched
-        if ! grep -q "mcp-info" "$gaianet_base_dir/dashboard/index.html"; then
+        # Check both old and new dashboard paths
+        dashboard_path="$gaianet_base_dir/dashboard/chatbot-ui/dashboard/index.html"
+        if [ ! -f "$dashboard_path" ]; then
+            dashboard_path="$gaianet_base_dir/dashboard/index.html"
+        fi
+        
+        if [ -f "$dashboard_path" ] && ! grep -q "mcp-info" "$dashboard_path"; then
             # Download the patch script if it doesn't exist locally
             if [ ! -f "$bin_dir/patch-dashboard-mcp.sh" ]; then
                 check_curl $fork_raw_base/$repo_branch/scripts/patch-dashboard-mcp.sh $bin_dir/patch-dashboard-mcp.sh
                 chmod +x $bin_dir/patch-dashboard-mcp.sh
             fi
             
-            # Apply patch
-            if bash $bin_dir/patch-dashboard-mcp.sh "$gaianet_base_dir/dashboard/index.html" > /dev/null 2>&1; then
+            # Apply patch (script will auto-detect correct path)
+            if bash $bin_dir/patch-dashboard-mcp.sh > /dev/null 2>&1; then
                 info "      👍 MCP section added to dashboard"
             else
                 warning "      ⚠️  Could not patch dashboard with MCP info"

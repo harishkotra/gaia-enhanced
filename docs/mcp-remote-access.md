@@ -20,10 +20,22 @@ The MCP gateway is automatically started when you run `gaianet start`.
 
 ## Default Access
 
+### Finding Your Node URL
+
+When you run `gaianet start`, the output displays your node's public URL:
+
+```
+... https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains
+```
+
+### Using Your Node URL
+
+Replace `0xf63939431ee11267f4855a166e11cc44d24960c0` with your actual node ID in all requests:
+
 ```bash
 # Public access works out of the box
-curl https://0xYOUR-NODE-ID.gaia.domains/health
-curl https://0xYOUR-NODE-ID.gaia.domains/v1/mcp/discover | jq .
+curl https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains/health
+curl https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains/v1/mcp/discover | jq .
 
 # Local access also works
 curl http://127.0.0.1:8080/health
@@ -64,5 +76,5 @@ The gateway will listen on port 8080 and route traffic to:
 ## Need Help?
 
 - GitHub Issues: https://github.com/harishkotra/gaia-enhanced/issues
-- Documentation: https://github.com/harishkotra/gaia-enhanced/blob/main/README-MCP.md
+- Documentation: https://github.com/harishkotra/gaia-enhanced/blob/main/README.md#model-context-protocol
 - Examples: Explore `examples/` directory for testing scripts

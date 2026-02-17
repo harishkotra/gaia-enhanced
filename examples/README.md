@@ -10,17 +10,23 @@ Make sure your GaiaNet node is running:
 gaianet start
 ```
 
-Then run one of the test scripts:
+The startup output shows your node's public URL:
+
+```
+... https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains
+```
+
+Then run one of the test scripts (replace the node ID with your actual node ID):
 
 ```bash
 # Test via public URL (works from anywhere)
-NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains ./examples/test-mcp.sh
 
 # Or test locally
 ./examples/test-mcp.sh
 
 # Python version
-NODE_URL=https://0xYOUR-NODE-ID.gaia.domains python3 examples/test-mcp.py
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains python3 examples/test-mcp.py
 ```
 
 **Note:** MCP endpoints are accessible through your public node URL via an integrated gateway. No additional configuration needed!
@@ -45,8 +51,8 @@ NODE_URL=https://0xYOUR-NODE-ID.gaia.domains python3 examples/test-mcp.py
 # Local testing (default)
 ./examples/test-mcp.sh
 
-# Remote testing
-NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
+# Remote testing (replace with your actual node ID)
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains ./examples/test-mcp.sh
 ```
 
 **Requirements:**
@@ -77,8 +83,8 @@ pip install requests
 # Local testing
 python3 examples/test-mcp.py
 
-# Remote testing
-NODE_URL=https://0xYOUR-NODE-ID.gaia.domains python3 examples/test-mcp.py
+# Remote testing (replace with your actual node ID)
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains python3 examples/test-mcp.py
 ```
 
 **Requirements:**
@@ -171,7 +177,7 @@ chat = requests.post(
 ## More Examples
 
 For language-specific examples and advanced usage, see:
-- [README-MCP.md](../README-MCP.md) - Complete MCP documentation
+- [README.md MCP Section](../README.md#model-context-protocol) - Complete MCP documentation
 - [docs/mcp-capabilities.md](../docs/mcp-capabilities.md) - Capability reference
 - Node dashboard - `https://<node-id>.gaia.domains/` (includes live examples)
 

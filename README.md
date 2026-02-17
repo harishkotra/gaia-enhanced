@@ -67,17 +67,29 @@ This fork includes built-in support for the **Model Context Protocol (MCP)**, en
 
 MCP provides a uniform way for applications to discover and interact with AI services. Your GaiaNet node automatically exposes MCP endpoints when started.
 
+### Your Node URL
+
+When you run `gaianet start`, the output displays your node's public URL:
+
+```
+... https://0xf63939431ee11267f4855a166e11cc44d24960c0.us.gaianet.network
+```
+
+Use this URL to access MCP endpoints from anywhere.
+
 ### Quick MCP Test
 
+Replace `0xf63939431ee11267f4855a166e11cc44d24960c0` with your actual node ID:
+
 ```bash
-# Check MCP server health (works via public URL)
-curl https://0xYOUR-NODE-ID.gaia.domains/health
+# Check MCP server health
+curl https://0xf63939431ee11267f4855a166e11cc44d24960c0.us.gaianet.network/health
 
 # Discover node capabilities
-curl https://0xYOUR-NODE-ID.gaia.domains/v1/mcp/discover | jq .
+curl https://0xf63939431ee11267f4855a166e11cc44d24960c0.us.gaianet.network/v1/mcp/discover | jq .
 
 # Or run the comprehensive test script
-NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
+NODE_URL=https://0xf63939431ee11267f4855a166e11cc44d24960c0.us.gaianet.network ./examples/test-mcp.sh
 ```
 
 ### MCP Features
@@ -88,12 +100,81 @@ NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
 - **Dashboard integration**: Your node dashboard includes MCP documentation and examples
 - **Registry support**: Nodes can register with MCP registries for discovery
 
-### Learn More
+### MCP Endpoints
 
-- [README-MCP.md](README-MCP.md) - Complete MCP documentation with code examples
-- [examples/](examples/) - Test scripts in Python and Bash
-- [docs/architecture-mcp.md](docs/architecture-mcp.md) - Technical architecture
-- Node dashboard - `https://<your-node-id>.gaia.domains/` includes live MCP examples
+| Endpoint | Description |
+|----------|-------------|
+| `/health` | Health check |
+| `/mcp/info` | MCP metadata and capabilities |
+| `/v1/mcp/discover` | Full MCP discovery information |
+
+### Code Examples
+
+**Python:**
+```python
+import requests
+
+# Use your public node URL
+NODE_URL = "https://0xf63939431ee11267f4855a166e11cc44d24960c0.gaia.domains"
+
+# Discover capabilities
+response = requests.get(f'{NODE_URL}/v1/mcp/discover')
+mcp_info = response.json()
+print(f"Capabilities: {mcp_info['mcp']['capabilities']}")
+
+# Chat completion
+chat_response = requests.post(f'{NODE_URL}/v1/chat/completions', json={
+    "messages": [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What is MCP?"}
+    ]
+})
+print(chat_response.json()['choices'][0]['message']['content'])
+```
+
+**JavaScript:**
+```javascript
+const NODE_URL = "https://YOUR_NODE_ID.gaia.domains";
+
+// Discover capabilities
+const discover = await fetch(`${NODE_URL}/v1/mcp/discover`);
+const mcp = await discover.json();
+console.log('Capabilities:', mcp.mcp.capabilities);
+
+// Chat completion
+const chat = await fetch(`${NODE_URL}/v1/chat/completions`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    messages: [
+      { role: "system", content: "You are helpful." },
+      { role: "user", content: "Explain MCP." }
+    ]
+  })
+});
+const response = await chat.json();
+console.log(response.choices[0].message.content);
+```
+
+### Configuration
+
+MCP settings are in `$HOME/gaianet/mcp_config.json`:
+
+```json
+{
+  "enabled": true,
+  "http_url": "http://127.0.0.1:9090",
+  "capabilities": ["chat", "embeddings", "knowledge_search", "node_info"]
+}
+```
+
+Edit and restart the node to customize MCP features. For more details, see [docs/architecture-mcp.md](docs/architecture-mcp.md) and [examples/](examples/).
+
+## Learn More
+
+- [Comprehensive MCP Guide](docs/mcp-remote-access.md) - Remote access and setup guide
+- [Test Scripts](examples/) - Python and Bash examples
+- [Technical Architecture](docs/architecture-mcp.md) - MCP implementation details
 
 ## Install guide
 
