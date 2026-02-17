@@ -59,6 +59,42 @@ To stop the node, you can run the following script.
 gaianet stop
 ```
 
+## Model Context Protocol (MCP) Support
+
+This fork includes built-in support for the **Model Context Protocol (MCP)**, enabling standardized discovery and programmatic access to node capabilities.
+
+### What is MCP?
+
+MCP provides a uniform way for applications to discover and interact with AI services. Your GaiaNet node automatically exposes MCP endpoints when started.
+
+### Quick MCP Test
+
+```bash
+# Check MCP server health
+curl http://127.0.0.1:9090/health
+
+# Discover node capabilities
+curl http://127.0.0.1:9090/v1/mcp/discover | jq .
+
+# Or run the comprehensive test script
+./examples/test-mcp.sh
+```
+
+### MCP Features
+
+- **Auto-start**: MCP server starts automatically with your node
+- **Zero config**: Works out of the box on port 9090
+- **Standard endpoints**: `/health`, `/mcp/info`, `/v1/mcp/discover`
+- **Dashboard integration**: Your node dashboard includes MCP documentation and examples
+- **Registry support**: Nodes can register with MCP registries for discovery
+
+### Learn More
+
+- [README-MCP.md](README-MCP.md) - Complete MCP documentation with code examples
+- [examples/](examples/) - Test scripts in Python and Bash
+- [docs/architecture-mcp.md](docs/architecture-mcp.md) - Technical architecture
+- Node dashboard - `https://<your-node-id>.gaia.domains/` includes live MCP examples
+
 ## Install guide
 
 ```bash

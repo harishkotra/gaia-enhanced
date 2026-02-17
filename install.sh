@@ -223,6 +223,77 @@ is_valid_frpc() {
     return 1
 }
 
+is_valid_nodeid() {
+    if [ ! -f "$1" ]; then
+        return 1
+    fi
+
+    if grep -q "Not Found" "$1" || grep -q "<html" "$1"; then
+        return 1
+    fi
+
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$1" <<'PY'
+import json
+import sys
+try:
+    with open(sys.argv[1], "r") as handle:
+        json.load(handle)
+    sys.exit(0)
+except Exception:
+    sys.exit(1)
+PY
+        return $?
+    fi
+
+    return 0
+}
+
+is_valid_config() {
+    if [ ! -f "$1" ]; then
+        return 1
+    fi
+
+    if grep -q "Not Found" "$1" || grep -q "<html" "$1"; then
+        return 1
+    fi
+
+    if command -v python3 >/dev/null 2>&1; then
+        python3 - "$1" <<'PY'
+import json
+import sys
+try:
+    with open(sys.argv[1], "r") as handle:
+        data = json.load(handle)
+        if "address" in data and "chat" in data:
+            sys.exit(0)
+    sys.exit(1)
+except Exception:
+    sys.exit(1)
+PY
+        return $?
+    fi
+
+    return 0
+}
+
+is_valid_shell_script() {
+    if [ ! -f "$1" ]; then
+        return 1
+    fi
+
+    if grep -q "Not Found" "$1" || grep -q "<html" "$1"; then
+        return 1
+    fi
+
+    # Check if it starts with a shebang
+    if head -n 1 "$1" | grep -q "^#!"; then
+        return 0
+    fi
+
+    return 1
+}
+
 sed_in_place() {
     if [ "$(uname)" == "Darwin" ]; then
         sed -i '' "$@"
@@ -408,12 +479,31 @@ bin_dir=$gaianet_base_dir/bin
 
 # 1. Install `gaianet` CLI tool.
 printf "[+] Installing gaianet CLI tool ...\n"
-check_curl $fork_release_base/$version/gaianet $bin_dir/gaianet
 
 if [ "$repo_branch" = "main" ]; then
     check_curl $fork_release_base/$version/gaianet $bin_dir/gaianet
+    
+    # Validate downloaded gaianet CLI
+    if ! is_valid_shell_script "$bin_dir/gaianet"; then
+        printf "      ⚠️  Downloaded gaianet CLI is invalid, trying upstream...\n"
+        check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/gaianet $bin_dir/gaianet
+        
+        if ! is_valid_shell_script "$bin_dir/gaianet"; then
+            error "Failed to download valid gaianet CLI from both fork and upstream"
+        fi
+    fi
 else
     check_curl $fork_raw_base/$repo_branch/gaianet $bin_dir/gaianet
+    
+    # Validate downloaded gaianet CLI
+    if ! is_valid_shell_script "$bin_dir/gaianet"; then
+        printf "      ⚠️  Downloaded gaianet CLI is invalid, trying upstream...\n"
+        check_curl https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/$repo_branch/gaianet $bin_dir/gaianet
+        
+        if ! is_valid_shell_script "$bin_dir/gaianet"; then
+            error "Failed to download valid gaianet CLI from both fork and upstream"
+        fi
+    fi
 fi
 
 chmod u+x $bin_dir/gaianet
@@ -629,8 +719,28 @@ else
     if [ ! -f "$gaianet_base_dir/config.json" ]; then
         if [ "$repo_branch" = "main" ]; then
             check_curl $fork_release_base/$version/config.json $gaianet_base_dir/config.json
+            
+            # Validate downloaded config.json
+            if ! is_valid_config "$gaianet_base_dir/config.json"; then
+                printf "      ⚠️  Downloaded config.json is invalid, trying upstream...\n"
+                check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/config.json $gaianet_base_dir/config.json
+                
+                if ! is_valid_config "$gaianet_base_dir/config.json"; then
+                    error "Failed to download valid config.json from both fork and upstream"
+                fi
+            fi
         else
             check_curl $fork_raw_base/$repo_branch/config.json $gaianet_base_dir/config.json
+            
+            # Validate downloaded config.json
+            if ! is_valid_config "$gaianet_base_dir/config.json"; then
+                printf "      ⚠️  Downloaded config.json is invalid, trying upstream...\n"
+                check_curl https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/$repo_branch/config.json $gaianet_base_dir/config.json
+                
+                if ! is_valid_config "$gaianet_base_dir/config.json"; then
+                    error "Failed to download valid config.json from both fork and upstream"
+                fi
+            fi
         fi
 
         info "    👍 Done! The default config file is downloaded in $gaianet_base_dir"
@@ -887,6 +997,28 @@ if [ ! -d "$gaianet_base_dir/dashboard" ] || [ "$reinstall" -eq 1 ]; then
     rm -rf $gaianet_base_dir/dashboard.tar.gz
 
     info "    👍 Done! The dashboard is downloaded in $gaianet_base_dir"
+    
+    # Patch dashboard with MCP information
+    printf "    * Adding MCP information to dashboard ...\n"
+    if [ -f "$gaianet_base_dir/dashboard/index.html" ]; then
+        # Check if already patched
+        if ! grep -q "mcp-info" "$gaianet_base_dir/dashboard/index.html"; then
+            # Download the patch script if it doesn't exist locally
+            if [ ! -f "$bin_dir/patch-dashboard-mcp.sh" ]; then
+                check_curl $fork_raw_base/$repo_branch/scripts/patch-dashboard-mcp.sh $bin_dir/patch-dashboard-mcp.sh
+                chmod +x $bin_dir/patch-dashboard-mcp.sh
+            fi
+            
+            # Apply patch
+            if bash $bin_dir/patch-dashboard-mcp.sh "$gaianet_base_dir/dashboard/index.html" > /dev/null 2>&1; then
+                info "      👍 MCP section added to dashboard"
+            else
+                warning "      ⚠️  Could not patch dashboard with MCP info"
+            fi
+        else
+            info "      👍 MCP section already present"
+        fi
+    fi
 else
     warning "    ❗ Use the cached dashboard in $gaianet_base_dir"
 fi
@@ -942,6 +1074,17 @@ else
     if [ ! -f "$gaianet_base_dir/nodeid.json" ]; then
         printf "    * Download nodeid.json ...⏳\n"
         check_curl $fork_release_base/$version/nodeid.json $gaianet_base_dir/nodeid.json
+        
+        # Validate downloaded nodeid.json
+        if ! is_valid_nodeid "$gaianet_base_dir/nodeid.json"; then
+            printf "      ⚠️  Downloaded nodeid.json is invalid, trying upstream...\n"
+            check_curl https://github.com/GaiaNet-AI/gaianet-node/releases/download/$version/nodeid.json $gaianet_base_dir/nodeid.json
+            
+            if ! is_valid_nodeid "$gaianet_base_dir/nodeid.json"; then
+                error "Failed to download valid nodeid.json from both fork and upstream"
+            fi
+        fi
+        
         info "      👍 Done!"
     fi
 
