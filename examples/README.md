@@ -13,14 +13,17 @@ gaianet start
 Then run one of the test scripts:
 
 ```bash
-# Test locally (default - recommended)
+# Test via public URL (works from anywhere)
+NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
+
+# Or test locally
 ./examples/test-mcp.sh
 
-# Python version - local
-python3 examples/test-mcp.py
+# Python version
+NODE_URL=https://0xYOUR-NODE-ID.gaia.domains python3 examples/test-mcp.py
 ```
 
-**Note:** MCP endpoints run on `localhost:9090` by default. For remote access, see [docs/mcp-remote-access.md](../docs/mcp-remote-access.md).
+**Note:** MCP endpoints are accessible through your public node URL via an integrated gateway. No additional configuration needed!
 
 ## Available Examples
 

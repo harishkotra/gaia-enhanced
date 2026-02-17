@@ -96,9 +96,8 @@ curl <mcp_base_url>/v1/mcp/discover | jq .
 </code></pre>
 
     <div class="alert alert-info" role="alert">
-        <strong>Note:</strong> MCP endpoints are currently accessible via localhost (http://127.0.0.1:9090). 
-        Remote access through the public URL requires additional reverse proxy configuration. 
-        See the <a href="https://github.com/harishkotra/gaia-enhanced/blob/main/docs/mcp-remote-access.md" target="_blank">MCP Remote Access Guide</a> for details.
+        <strong>Integrated Gateway:</strong> MCP endpoints are accessible through your public node URL via an integrated gateway. 
+        No additional configuration required!
     </div>
 </div>
 

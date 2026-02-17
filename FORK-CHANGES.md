@@ -56,6 +56,33 @@ All changes that diverge from upstream (GaiaNet-AI/gaianet-node) are tracked her
     * Rationale: Preserves upstream compatibility, allows independent MCP deployment
     * Trade-off: Requires additional proxy setup for public API access
     * Benefit: Clean separation of concerns, easier to maintain fork
+- **Integrated MCP Gateway (2026-02-17 evening)**:
+  - **Major Architecture Change**: Created integrated MCP gateway to route all traffic through FRP tunnel
+  - **New Component**: `mcp-gateway` - Lightweight Go-based reverse proxy
+  - **Gateway Functionality**:
+    * Listens on port 8080 (main FRP-tunneled port)
+    * Routes `/health`, `/mcp/*`, `/v1/mcp/*` to MCP server (port 9090)
+    * Routes all other traffic to gaia-nexus (moved to port 8081)
+    * Automatic startup/shutdown with `gaianet start/stop`
+  - **Configuration Changes**:
+    * Updated `config.json`: `llamaedge_port` changed from 8080 → 8081
+    * Added `mcp-gateway` binary installation in `install.sh`
+    * Updated gaianet wrapper to manage gateway lifecycle
+  - **User Impact**:
+    * ✅ **MCP endpoints now accessible via public URL** (no extra config needed)
+    * ✅ Works out of the box: `curl https://0x....gaia.domains/health`
+    * ✅ No need for reverse proxy, SSH tunnel, or manual setup
+    * ✅ Dashboard MCP examples work directly with public URL
+  - **Documentation Updates**:
+    * Updated all examples to use public URLs
+    * Simplified README-MCP.md (removed local-only restrictions)
+    * Updated `mcp-remote-access.md` to reflect this is now default behavior
+    * Dashboard alert changed from "requires proxy" to "integrated gateway"
+  - **Architecture Rationale**:
+    * Provides seamless public API access while maintaining component isolation
+    * Gateway is stateless and lightweight (pure reverse proxy)
+    * Allows independent updates to MCP server without touching gateway
+    * Single entry point (port 8080) simplifies FRP tunnel configuration
 
 ## 2026-02-16
 

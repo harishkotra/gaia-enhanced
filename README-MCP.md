@@ -43,11 +43,7 @@ This fork started from GaiaNet-AI/gaianet-node. Upstream development appears ina
 
 ## Using MCP
 
-Once your GaiaNet node is running, the MCP server is automatically started on `localhost:9090`. 
-
-### Important: Local vs Remote Access
-
-**By default, MCP endpoints are accessible locally only.** Remote access through your public node URL requires additional configuration. See [docs/mcp-remote-access.md](docs/mcp-remote-access.md) for detailed setup instructions.
+Once your GaiaNet node is running, the MCP server is automatically started and **accessible through your public node URL**. An integrated gateway routes MCP traffic seamlessly through the same domain as your main node APIs.
 
 ### MCP Endpoints
 
@@ -57,33 +53,20 @@ Once your GaiaNet node is running, the MCP server is automatically started on `l
 | `/mcp/info` | MCP metadata and capabilities | GET |
 | `/v1/mcp/discover` | Full MCP discovery information | GET |
 
-### Quick Test (Local)
+### Quick Test
 
 ```bash
-# Local testing (on the node machine)
-curl http://127.0.0.1:9090/health
-curl http://127.0.0.1:9090/v1/mcp/discover | jq .
+# Test from anywhere using your public node URL
+curl https://0xYOUR-NODE-ID.gaia.domains/health
+curl https://0xYOUR-NODE-ID.gaia.domains/v1/mcp/discover | jq .
+
+# Or test locally on the node machine
+curl http://127.0.0.1:8080/health
+curl http://127.0.0.1:8080/v1/mcp/discover | jq .
 
 # Use test scripts
-./examples/test-mcp.sh
+NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
 python3 examples/test-mcp.py
-```
-
-### Remote Access
-
-For remote testing or production use, see [MCP Remote Access Guide](docs/mcp-remote-access.md) which covers:
-- SSH tunneling for secure remote testing
-- Reverse proxy setup (Nginx, Caddy)
-- FRP configuration options
-- Security best practices
-
-Quick remote test via SSH tunnel:
-```bash
-# From your local machine
-ssh -L 9090:localhost:9090 user@your-node-server
-
-# Then in another terminal
-curl http://127.0.0.1:9090/health
 ```
 
 ### Python Example
@@ -91,9 +74,9 @@ curl http://127.0.0.1:9090/health
 ```python
 import requests
 
-# MCP server runs on localhost:9090 by default
-mcp_base = "http://127.0.0.1:9090"
-chat_base = "http://127.0.0.1:9068"
+# Use your public node URL
+mcp_base = "https://0xYOUR-NODE-ID.gaia.domains"
+chat_base = "https://0xYOUR-NODE-ID.gaia.domains"
 
 # Discover node capabilities
 response = requests.get(f'{mcp_base}/v1/mcp/discover')
@@ -115,16 +98,14 @@ chat_response = requests.post(chat_url, json={
 print(f"\nChat Response: {chat_response.json()['choices'][0]['message']['content']}")
 ```
 
-**For remote access:** See [docs/mcp-remote-access.md](docs/mcp-remote-access.md) to configure reverse proxy.
-
 ### JavaScript/Node.js Example
 
 ```javascript
 const fetch = require('node-fetch');
 
-// MCP server runs on localhost by default
-const mcpBase = 'http://127.0.0.1:9090';
-const chatBase = 'http://127.0.0.1:9068';
+// Use your public node URL
+const mcpBase = 'https://0xYOUR-NODE-ID.gaia.domains';
+const chatBase = 'https://0xYOUR-NODE-ID.gaia.domains';
 
 async function discoverMCP() {
   // Discover capabilities
@@ -153,16 +134,12 @@ async function discoverMCP() {
 discoverMCP();
 ```
 
-**For remote access:** See [docs/mcp-remote-access.md](docs/mcp-remote-access.md) for configuration options.
-
 ### Dashboard
 
 Your node dashboard at `https://<node-id>.gaia.domains/` includes a dedicated MCP section with:
-- Interactive endpoint links for local testing
+- Interactive endpoint links (accessible via your public URL)
 - Code examples in Python and cURL
-- Configuration notes and remote access documentation link
-
-**Note:** The dashboard provides local testing examples. For remote MCP access, see the [Remote Access Guide](docs/mcp-remote-access.md).
+- Live testing capabilities
 
 ### Configuration
 

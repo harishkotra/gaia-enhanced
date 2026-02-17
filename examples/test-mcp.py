@@ -32,21 +32,21 @@ except ImportError:
     sys.exit(1)
 
 # Get node URL from environment or use localhost
-NODE_URL = os.environ.get('NODE_URL', 'http://127.0.0.1')
+NODE_URL = os.environ.get('NODE_URL', 'http://127.0.0.1:8080')
 
 # Determine if we're testing locally or remotely
 is_local = '127.0.0.1' in NODE_URL or 'localhost' in NODE_URL
 
 if is_local:
-    # Local testing - use explicit ports
-    MCP_BASE = f"{NODE_URL}:9090"
-    CHAT_BASE = f"{NODE_URL}:9068"
-    EMBED_BASE = f"{NODE_URL}:9069"
-else:
-    # Remote testing - use same base URL (proxied)
+    # Local testing - MCP gateway on 8080, direct chat/embed ports
     MCP_BASE = NODE_URL
-    CHAT_BASE = f"{NODE_URL}/v1"
-    EMBED_BASE = f"{NODE_URL}/v1"
+    CHAT_BASE = "http://127.0.0.1:9068"
+    EMBED_BASE = "http://127.0.0.1:9069"
+else:
+    # Remote testing - all through same public URL (proxied via gateway)
+    MCP_BASE = NODE_URL
+    CHAT_BASE = NODE_URL
+    EMBED_BASE = NODE_URL
 
 def test_mcp_health():
     """Test MCP server health"""

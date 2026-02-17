@@ -70,14 +70,14 @@ MCP provides a uniform way for applications to discover and interact with AI ser
 ### Quick MCP Test
 
 ```bash
-# Check MCP server health
-curl http://127.0.0.1:9090/health
+# Check MCP server health (works via public URL)
+curl https://0xYOUR-NODE-ID.gaia.domains/health
 
 # Discover node capabilities
-curl http://127.0.0.1:9090/v1/mcp/discover | jq .
+curl https://0xYOUR-NODE-ID.gaia.domains/v1/mcp/discover | jq .
 
 # Or run the comprehensive test script
-./examples/test-mcp.sh
+NODE_URL=https://0xYOUR-NODE-ID.gaia.domains ./examples/test-mcp.sh
 ```
 
 ### MCP Features

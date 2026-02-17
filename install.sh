@@ -536,14 +536,47 @@ rm $bin_dir/gaianet-mcp-server.tar.gz
 chmod u+x $bin_dir/gaianet-mcp-server
 info "    👍 Done! The gaianet MCP server is downloaded in $bin_dir"
 
-# 1.6 Write default MCP config
+# 1.6 Install MCP gateway (routes MCP traffic through main gateway)
+printf "[+] Installing MCP gateway ...\n"
+mcp_gateway_version="0.1.0"
+if [ "$(uname)" == "Darwin" ]; then
+    if [ "$target" = "x86_64" ]; then
+        check_curl $fork_release_base/$mcp_gateway_version/mcp-gateway-darwin-x86_64.tar.gz $bin_dir/mcp-gateway.tar.gz
+    elif [ "$target" = "arm64" ]; then
+        check_curl $fork_release_base/$mcp_gateway_version/mcp-gateway-darwin-arm64.tar.gz $bin_dir/mcp-gateway.tar.gz
+    else
+        error " * Unsupported architecture: $target"
+        exit 1
+    fi
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    if [ "$target" = "x86_64" ]; then
+        check_curl $fork_release_base/$mcp_gateway_version/mcp-gateway-linux-x86_64.tar.gz $bin_dir/mcp-gateway.tar.gz
+    elif [ "$target" = "aarch64" ]; then
+        check_curl $fork_release_base/$mcp_gateway_version/mcp-gateway-linux-arm64.tar.gz $bin_dir/mcp-gateway.tar.gz
+    else
+        error " * Unsupported architecture: $target"
+        exit 1
+    fi
+else
+    error "Only support Linux, MacOS and Windows(WSL)."
+    exit 1
+fi
+cd $bin_dir
+tar -xzf mcp-gateway.tar.gz
+chmod u+x mcp-gateway-*
+mv mcp-gateway-* mcp-gateway
+rm mcp-gateway.tar.gz
+cd $gaianet_base_dir
+info "    👍 Done! The MCP gateway is installed in $bin_dir"
+
+# 1.7 Write default MCP config
 if [ ! -f "$gaianet_base_dir/mcp_config.json" ]; then
     printf "[+] Writing default mcp_config.json ...\n"
     check_curl $fork_raw_base/$repo_branch/mcp-server/mcp_config.sample.json $gaianet_base_dir/mcp_config.json
     info "    👍 Done! The mcp_config.json is created in $gaianet_base_dir"
 fi
 
-# 1.7 Wrap gaianet CLI to start MCP automatically
+# 1.8 Wrap gaianet CLI to start MCP automatically
 if [ -f "$bin_dir/gaianet" ]; then
     mv -f $bin_dir/gaianet $bin_dir/gaianet.real
 
@@ -556,20 +589,35 @@ bin_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 real_gaianet="$bin_dir/gaianet.real"
 base_dir="${GAIANET_BASE_DIR:-$HOME/gaianet}"
 mcp_bin="$bin_dir/gaianet-mcp-server"
-pid_file="$base_dir/mcp-server.pid"
+gateway_bin="$bin_dir/mcp-gateway"
+mcp_pid_file="$base_dir/mcp-server.pid"
+gateway_pid_file="$base_dir/mcp-gateway.pid"
 log_file="$base_dir/log/mcp-server.log"
+gateway_log_file="$base_dir/log/mcp-gateway.log"
 registry_url="${REGISTRY_URL:-http://127.0.0.1:9100}"
 registry_log="$base_dir/log/registry-client.log"
 mcp_port="${MCP_PORT:-9090}"
 
 start_mcp() {
+    # Start MCP server on port 9090
     if [ -x "$mcp_bin" ]; then
-        if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
+        if [ -f "$mcp_pid_file" ] && kill -0 "$(cat "$mcp_pid_file")" 2>/dev/null; then
             return 0
         fi
         mkdir -p "$base_dir/log"
         MCP_CONFIG="$base_dir/mcp_config.json" MCP_PORT="$mcp_port" "$mcp_bin" >>"$log_file" 2>&1 &
-        echo $! > "$pid_file"
+        echo $! > "$mcp_pid_file"
+    fi
+    
+    # Start MCP gateway on port 8080 (routes to MCP server and gaia-nexus)
+    if [ -x "$gateway_bin" ]; then
+        if [ -f "$gateway_pid_file" ] && kill -0 "$(cat "$gateway_pid_file")" 2>/dev/null; then
+            return 0
+        fi
+        # Wait a moment for MCP server to be ready
+        sleep 2
+        "$gateway_bin" >>"$gateway_log_file" 2>&1 &
+        echo $! > "$gateway_pid_file"
     fi
 }
 
@@ -630,9 +678,16 @@ PY
 }
 
 stop_mcp() {
-    if [ -f "$pid_file" ] && kill -0 "$(cat "$pid_file")" 2>/dev/null; then
-        kill "$(cat "$pid_file")" || true
-        rm -f "$pid_file"
+    # Stop MCP server
+    if [ -f "$mcp_pid_file" ] && kill -0 "$(cat "$mcp_pid_file")" 2>/dev/null; then
+        kill "$(cat "$mcp_pid_file")" || true
+        rm -f "$mcp_pid_file"
+    fi
+    
+    # Stop MCP gateway
+    if [ -f "$gateway_pid_file" ] && kill -0 "$(cat "$gateway_pid_file")" 2>/dev/null; then
+        kill "$(cat "$gateway_pid_file")" || true
+        rm -f "$gateway_pid_file"
     fi
 }
 

@@ -13,15 +13,16 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Default to localhost, but can be overridden with NODE_URL environment variable
-NODE_URL="${NODE_URL:-http://127.0.0.1}"
+NODE_URL="${NODE_URL:-http://127.0.0.1:8080}"
 
-# For localhost, use explicit ports. For remote URLs, use same base URL
+# For localhost, use port 8080 (MCP gateway). For remote URLs, use same base URL
 if [[ "$NODE_URL" == *"127.0.0.1"* ]] || [[ "$NODE_URL" == *"localhost"* ]]; then
-    MCP_URL="${NODE_URL}:9090"
-    CHAT_URL="${NODE_URL}:9068"
-    EMBED_URL="${NODE_URL}:9069"
+    # Local testing through MCP gateway on port 8080
+    MCP_URL="${NODE_URL}"
+    CHAT_URL="http://127.0.0.1:9068"
+    EMBED_URL="http://127.0.0.1:9069"
 else
-    # For public/remote URLs, MCP endpoints are proxied through the same domain
+    # Remote testing - all through same public URL
     MCP_URL="${NODE_URL}"
     CHAT_URL="${NODE_URL}"
     EMBED_URL="${NODE_URL}"
