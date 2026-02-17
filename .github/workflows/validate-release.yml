@@ -1,0 +1,114 @@
+name: Release Asset Validator
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to validate (e.g. 0.1.0)'
+        required: true
+        type: string
+
+jobs:
+  validate-release-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine release tag
+        id: release_tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Fetch release assets
+        id: fetch_assets
+        run: |
+          TAG="${{ steps.release_tag.outputs.tag }}"
+          echo "Validating release: $TAG"
+          
+          RELEASE_URL="https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG"
+          ASSETS=$(curl -sSL -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$RELEASE_URL" | jq -r '.assets[].name')
+          
+          echo "Found assets:"
+          echo "$ASSETS"
+          echo "$ASSETS" > assets.txt
+
+      - name: Validate required assets
+        run: |
+          REQUIRED_ASSETS=(
+            "gaianet"
+            "config.json"
+            "nodeid.json"
+            "frpc.toml"
+            "llama-api-server.wasm"
+            "install.sh"
+            "gaianet-mcp-server-apple-darwin-aarch64.tar.gz"
+            "gaianet-mcp-server-apple-darwin-x86_64.tar.gz"
+            "gaianet-mcp-server-unknown-linux-gnu-x86_64.tar.gz"
+          )
+          
+          MISSING_ASSETS=()
+          
+          for asset in "${REQUIRED_ASSETS[@]}"; do
+            if ! grep -q "^${asset}$" assets.txt; then
+              MISSING_ASSETS+=("$asset")
+            fi
+          done
+          
+          if [ ${#MISSING_ASSETS[@]} -gt 0 ]; then
+            echo "❌ Missing required release assets:"
+            for asset in "${MISSING_ASSETS[@]}"; do
+              echo "  - $asset"
+            done
+            exit 1
+          fi
+          
+          echo "✅ All required release assets are present"
+
+      - name: Validate wasm files
+        run: |
+          TAG="${{ steps.release_tag.outputs.tag }}"
+          
+          WASM_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/llama-api-server.wasm"
+          
+          echo "Downloading llama-api-server.wasm for validation..."
+          curl -sSL -o llama-api-server.wasm "$WASM_URL"
+          
+          # Check for magic header
+          MAGIC=$(head -c 4 llama-api-server.wasm | xxd -p)
+          if [ "$MAGIC" != "0061736d" ]; then
+            echo "❌ Invalid llama-api-server.wasm: missing wasm magic header"
+            echo "Found: $MAGIC"
+            head -c 64 llama-api-server.wasm
+            exit 1
+          fi
+          
+          echo "✅ llama-api-server.wasm is a valid WebAssembly file"
+
+      - name: Validate frpc.toml
+        run: |
+          TAG="${{ steps.release_tag.outputs.tag }}"
+          
+          FRPC_URL="https://github.com/${{ github.repository }}/releases/download/$TAG/frpc.toml"
+          
+          echo "Downloading frpc.toml for validation..."
+          curl -sSL -o frpc.toml "$FRPC_URL"
+          
+          # Check for common error strings
+          if grep -qi "not found" frpc.toml || grep -qi "<html" frpc.toml; then
+            echo "❌ Invalid frpc.toml: appears to be an error page"
+            cat frpc.toml
+            exit 1
+          fi
+          
+          # Check for expected config keys
+          if ! grep -q "serverAddr" frpc.toml; then
+            echo "❌ Invalid frpc.toml: missing serverAddr field"
+            cat frpc.toml
+            exit 1
+          fi
+          
+          echo "✅ frpc.toml is a valid configuration file"

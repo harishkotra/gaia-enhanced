@@ -32,6 +32,10 @@ jobs:
           sha256sum vector.toml >> SHA256SUM
           sha256sum install.sh >> SHA256SUM
           sha256sum uninstall.sh >> SHA256SUM
+          
+          # Download llama-api-server.wasm from LlamaEdge
+          curl -sSfL https://github.com/LlamaEdge/LlamaEdge/releases/download/0.27.0/llama-api-server.wasm -o llama-api-server.wasm
+          sha256sum llama-api-server.wasm >> SHA256SUM
 
           echo "Debug info(SHA256SUM):"
           cat SHA256SUM
@@ -59,4 +63,5 @@ jobs:
             nodeid.json
             frpc.toml
             vector.toml
+            llama-api-server.wasm
             SHA256SUM
