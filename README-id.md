@@ -18,7 +18,7 @@
 Instal kumpulan perangkat lunak *node* bawaan hanya dengan menggunakan satu baris perintah di Mac, Linux, atau Windows WSL.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 Kemudian, ikuti perintah yang muncul pada layar Anda untuk menyiapkan *environment path*. yang dimulai dengan mengetikkan `source`, contohnya adalah `source ~/.bashrc`.
@@ -50,7 +50,7 @@ gaianet stop
 ## Panduan Instalasi
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary> Hasilnya seharusnya akan seperti dibawah ini: </summary>
@@ -102,7 +102,7 @@ WasmEdge binaries accessible
 Secara bawaan, ini diinstal ke direktori `$HOME/gaianet`. Namun anda juga dapat memilih untuk menginstal ke direktori alternatif.
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## Inisialisasi node

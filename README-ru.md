@@ -25,7 +25,7 @@
 Установите стандартный программный стек узла одной командой на Mac, Linux или Windows WSL.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 > Затем следуйте подсказкам на экране для настройки переменной окружения PATH. Команда начнётся с `source`.
@@ -60,7 +60,7 @@ gaianet stop
 ## Руководство по установке
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary>Пример вывода: </summary>
@@ -112,7 +112,7 @@ WasmEdge binaries accessible
 По умолчанию установка происходит в каталог `$HOME/gaianet`. Вы можете указать другой каталог для установки:
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## Инициализация узла

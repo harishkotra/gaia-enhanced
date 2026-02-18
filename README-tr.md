@@ -17,7 +17,7 @@
 Mac, Linux veya Windows WSL'de tek bir komut satırıyla varsayılan düğüm yazılım yığınını yükleyin.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 Düğümü başlatın. Bu işlem `$HOME/gaianet/config.json` dosyasında belirtilen model dosyalarını ve vektör veritabanı dosyalarını indirecektir ve dosyalar büyük olduğu için birkaç dakika sürebilir.
@@ -100,7 +100,7 @@ WasmEdge binaries accessible
 Varsayılan olarak `$HOME/gaianet` dizinine yüklenir. Alternatif bir dizine yüklemeyi de seçebilirsiniz.
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## Düğümü başlatın

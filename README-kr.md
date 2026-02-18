@@ -25,7 +25,7 @@
 Mac, Linux 또는 Windows WSL에서 다음 단일 명령줄로 기본 노드 소프트웨어 스택을 설치하세요.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 > 설치 후, 화면에 표시되는 안내에 따라 환경 경로를 설정하세요. 명령어는 `source`로 시작됩니다.
@@ -59,7 +59,7 @@ gaianet stop
 ## 설치 가이드
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary> 출력 예시 보기 </summary>
@@ -94,7 +94,7 @@ WasmEdge binaries accessible
 기본적으로 `$HOME/gaianet`에 설치됩니다. 다른 디렉토리에 설치하려면:
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## 노드 초기화

@@ -18,7 +18,7 @@ Mac、Linux、またはWindows WSLで、一行のコマンドでデフォルト�
 
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 
@@ -58,7 +58,7 @@ gaianet stop
 ## インストールガイド
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 
@@ -117,7 +117,7 @@ WasmEdge binaries accessible
 
 
 ```
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 

@@ -26,7 +26,7 @@
 قم بتثبيت حزمة برامج العقدة الافتراضية باستخدام أمر واحد على نظام التشغيل Mac أو Linux أو Windows WSL.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 ثم اتبع التعليمات على شاشتك لإعداد مسار البيئة, سيبدأ سطر الأوامر بالأمر `source`.
@@ -58,7 +58,7 @@ gaianet stop
 ## دليل التثبيت
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary> يجب أن تبدو النتائج كما يلي: </summary>
@@ -110,7 +110,7 @@ WasmEdge binaries accessible
 بشكل افتراضي, يتم التثبيت ب `$HOME/gaianet`, يمكنك أيضًا أن تختارَ عنوانًا بديلاً.
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## تهيئة العقدة

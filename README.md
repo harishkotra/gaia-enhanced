@@ -23,10 +23,10 @@ Checkout our [official docs](https://docs.gaianet.ai/) and a [Manning ebook](htt
 
 ## Quick start
 
-Install the default node software stack with a single line of command on Mac, Linux, or Windows WSL.
+Install the default node software stack with **MCP support** using a single line of command on Mac, Linux, or Windows WSL.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 > Then, follow the prompt on your screen to set up the environment path. The command line will begin with `source`.
@@ -179,7 +179,7 @@ Edit and restart the node to customize MCP features. For more details, see [docs
 ## Install guide
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary> The output should look like below: </summary>
@@ -231,7 +231,7 @@ WasmEdge binaries accessible
 By default, it installs into the `$HOME/gaianet` directory. You can also choose to install into an alternative directory.
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## Initialize the node

@@ -19,7 +19,7 @@
 在 Mac、Linux 或 Windows WSL 上只需一行命令即可安装默认节点软件栈。
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 初始化节点。这将下载 `$HOME/gaianet/config.json` 文件中指定的模型文件和向量数据库文件，由于文件较大，可能需要几分钟时间。
@@ -51,7 +51,7 @@ gaianet stop
 ## 安装指南
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary> 输出结果应如下所示： </summary>
@@ -103,7 +103,7 @@ WasmEdge binaries accessible
 默认情况下，它会安装到 `$HOME/gaianet` 目录中。您也可以选择安装在其他目录下。
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## 初始化节点

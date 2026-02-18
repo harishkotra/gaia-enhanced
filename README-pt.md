@@ -3,7 +3,7 @@
 Instale a pilha de software padrão do nó com uma única linha de comando no Mac, Linux ou Windows WSL.
 
 ```bash
-curl -sSfL 'https://github.com/GaiaNet-AI/gaianet-node/releases/latest/download/install.sh' | bash
+curl -sSfL 'https://github.com/harishkotra/gaia-enhanced/releases/latest/download/install.sh' | bash
 ```
 
 Em seguida, siga as instruções na tela para configurar o caminho do ambiente. A linha de comando começará com `source`.
@@ -36,7 +36,7 @@ gaianet stop
 ## Guia de Instalação
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash
 ```
 
 <details><summary>A saída deve ser semelhante a esta:</summary>
@@ -88,7 +88,7 @@ Binários do WasmEdge acessíveis
 Por padrão, ele instala no diretório `$HOME/gaianet`. Você também pode optar por instalar em um diretório alternativo.
 
 ```bash
-curl -sSfL 'https://raw.githubusercontent.com/GaiaNet-AI/gaianet-node/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
+curl -sSfL 'https://raw.githubusercontent.com/harishkotra/gaia-enhanced/main/install.sh' | bash -s -- --base $HOME/gaianet.alt
 ```
 
 ## Inicialize o nó
